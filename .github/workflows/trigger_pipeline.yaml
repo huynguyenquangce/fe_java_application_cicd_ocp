@@ -36,17 +36,17 @@ jobs:
           echo "----- PATCHED deployment.yaml -----"
           cat k8s/deployment.yaml
 
-      # - name: Install OpenShift CLI
-      #   run: |
-      #     curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz | tar -xz
-      #     sudo mv oc kubectl /usr/local/bin/
+      - name: Install OpenShift CLI
+        run: |
+          curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz | tar -xz
+          sudo mv oc kubectl /usr/local/bin/
 
-      # - name: Login to OpenShift
-      #   run: |
-      #     oc login --token=${{ secrets.OCP_TOKEN }} --server=${{ secrets.OCP_SERVER }}
+      - name: Login to OpenShift
+        run: |
+          oc login --token=${{ secrets.OCP_TOKEN }} --server=${{ secrets.OCP_SERVER }}
 
-      # - name: Deploy to OpenShift
-      #   run: |
-      #     oc apply -f k8s/deployment.yaml
-      #     oc rollout status deployment/myapp
+      - name: Deploy to OpenShift
+        run: |
+          oc apply -f k8s/deployment.yaml
+          oc rollout status deployment/myapp
         # oc project ${{ secrets.OCP_NAMESPACE }}
