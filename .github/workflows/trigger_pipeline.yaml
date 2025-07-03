@@ -1,4 +1,4 @@
-name: Full CI/CD without Tekton
+name: Trigger Tekton Pipeline
 
 on:
   push:
@@ -6,52 +6,18 @@ on:
       - main
 
 env:
-  IMAGE_NAME: fe_application
-  IMAGE_REGISTRY: docker.io
   GIT_SHA: ${{ github.sha }}
 
 jobs:
-  build-push-deploy-frontend-reactjs:
+  trigger-tekton:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Docker Login
+      - name: Trigger Tekton via curl
         run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-      - name: Build image
-        run: |
-          docker build -t ${IMAGE_REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${GIT_SHA} .
-
-      - name: Push image
-        run: |
-          docker push ${IMAGE_REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${GIT_SHA}
-
-      - name: Patch image tag in deployment.yaml
-        run: |
-          sed -i "s|image: .*|image: ${IMAGE_REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${GIT_SHA}|" k8s/deployment.yaml
-          echo "----- PATCHED deployment.yaml -----"
-          cat k8s/deployment.yaml
-
-      - name: Install OpenShift CLI
-        run: |
-          curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz | tar -xz        
-          sudo mv oc kubectl /usr/local/bin/
-          
-      - name: Login to OpenShift
-        run: |
-          echo "Logging into OpenShift..."
-          echo "Server: ${{ secrets.OCP_SERVER }}"    
-          echo "Token: ${{ secrets.OCP_TOKEN }}"  
-          oc login --token=${{ secrets.OCP_TOKEN }} --server=${{ secrets.OCP_SERVER }}
-
-      - name: Deploy to OpenShift
-        run: |
-          oc apply -f k8s/deployment.yaml
-
-          
-        # oc rollout status deployment/myapp
-        # oc project ${{ secrets.OCP_NAMESPACE }}
+          curl -X POST http://myapp-listener-huy-nguyenquang116-dev.apps.rm1.0a51.p1.openshiftapps.com \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"git_url\": \"https://github.com/huynguyenquangce/fe_java_application_cicd_ocp.git\",
+              \"git_revision\": \"refs/heads/main\",
+              \"image_tag\": \"${GIT_SHA:0:7}\"
+            }"
