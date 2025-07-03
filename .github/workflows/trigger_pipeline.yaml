@@ -11,7 +11,7 @@ env:
   GIT_SHA: ${{ github.sha }}
 
 jobs:
-  build-push-deploy:
+  build-push-deploy-frontend-reactjs:
     runs-on: ubuntu-latest
 
     steps:
@@ -41,7 +41,6 @@ jobs:
           curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz | tar -xz        
           sudo mv oc kubectl /usr/local/bin/
           
-
       - name: Login to OpenShift
         run: |
           echo "Logging into OpenShift..."
