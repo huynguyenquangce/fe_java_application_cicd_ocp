@@ -23,3 +23,34 @@ spec:
       imagePullPolicy: Always
       ports:
       - containerPort: 8080
+
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fe-route
+  namespace: huy-nguyenquang116-dev
+spec:
+  to:
+    kind: Service
+    name: fe-service
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+  wildcardPolicy: None
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fe-service
+spec:
+  selector:
+    app: fe-application
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 8080
+  type: ClusterIP
+   

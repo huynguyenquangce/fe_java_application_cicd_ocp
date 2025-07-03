@@ -52,5 +52,7 @@ jobs:
       - name: Deploy to OpenShift
         run: |
           oc apply -f k8s/deployment.yaml
-          oc rollout status deployment/myapp
+
+          
+        # oc rollout status deployment/myapp
         # oc project ${{ secrets.OCP_NAMESPACE }}
