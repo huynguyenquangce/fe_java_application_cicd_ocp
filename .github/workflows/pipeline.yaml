@@ -61,8 +61,8 @@ jobs:
             tkn pipeline start build-and-deploy \
             --prefix-name build-deploy-api-pipelinerun \
             -w name=shared-workspace,volumeClaimTemplateFile=https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/03_persistent_volume_claim.yaml \
-            -p deployment-name=${{ env.DEPLOYMENT_NAME }}\
-            -p git-url=${{ env.GIT_URL }} \
+            -p deployment-name=$DEPLOYMENT_NAME \
+            -p git-url=$GIT_URL \
             -p IMAGE=${IMAGE_REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${GIT_SHA} \
             --use-param-defaults
 
