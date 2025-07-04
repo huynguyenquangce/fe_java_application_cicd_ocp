@@ -36,7 +36,7 @@ jobs:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
         run: |
-          payload='{}'
+          payload=$(cat "$GITHUB_EVENT_PATH")
           signature='sha1='$(echo -n "$payload" | openssl sha1 -hmac "$WEBHOOK_SECRET" | sed 's/^.* //')
 
           curl -X POST $WEBHOOK_URL \
