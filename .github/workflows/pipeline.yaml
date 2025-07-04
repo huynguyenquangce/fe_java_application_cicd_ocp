@@ -30,40 +30,56 @@ jobs:
         run: |
           docker push ${IMAGE_REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${GIT_SHA}
 
+
+      - name: Trigger Tekton Webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        run: |
+          payload='{}'
+          signature='sha1='$(echo -n "$payload" | openssl sha1 -hmac "$WEBHOOK_SECRET" | sed 's/^.* //')
+
+          curl -X POST $WEBHOOK_URL \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: push" \
+            -H "X-Hub-Signature: $signature" \
+            -d "$payload"
+
+      
       # - name: Patch image tag in deployment.yaml
       #   run: |
       #     sed -i "s|image: .*|image: ${IMAGE_REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${GIT_SHA}|" k8s/deployment.yaml
       #     echo "----- PATCHED deployment.yaml -----"
       #     cat k8s/deployment.yaml
 
-      - name: Install OpenShift CLI
-        run: |
-          curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz | tar -xz        
-          sudo mv oc kubectl /usr/local/bin/
+      # - name: Install OpenShift CLI
+      #   run: |
+      #     curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz | tar -xz        
+      #     sudo mv oc kubectl /usr/local/bin/
           
-      - name: Login to OpenShift
-        run: |
-          oc login --token=${{ secrets.OCP_TOKEN }} --server=${{ secrets.OCP_SERVER }}
+      # - name: Login to OpenShift
+      #   run: |
+      #     oc login --token=${{ secrets.OCP_TOKEN }} --server=${{ secrets.OCP_SERVER }}
 
       # - name: Deploy to OpenShift
       #   run: |
       #     oc apply -f k8s/deployment.yaml
 
-      - name: Download tkn
-        run: |
-          curl -LO https://github.com/tektoncd/cli/releases/download/v0.39.0/tkn_0.39.0_Linux_x86_64.tar.gz
-          tar -xvf tkn_0.39.0_Linux_x86_64.tar.gz
-          sudo mv tkn /usr/local/bin
+      # - name: Download tkn
+      #   run: |
+      #     curl -LO https://github.com/tektoncd/cli/releases/download/v0.39.0/tkn_0.39.0_Linux_x86_64.tar.gz
+      #     tar -xvf tkn_0.39.0_Linux_x86_64.tar.gz
+      #     sudo mv tkn /usr/local/bin
 
-      - name: Trigger pipeline 
-        run: |
-            tkn pipeline start build-and-deploy \
-            --prefix-name build-deploy-api-pipelinerun \
-            -w name=shared-workspace,volumeClaimTemplateFile=https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/03_persistent_volume_claim.yaml \
-            -p deployment-name=fe-application \
-            -p git-url=https://github.com/huynguyenquangce/fe_java_application_cicd_ocp.git \
-            -p IMAGE=${IMAGE_REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${GIT_SHA} \
-            --use-param-defaults
+      # - name: Trigger pipeline 
+      #   run: |
+      #       tkn pipeline start build-and-deploy \
+      #       --prefix-name build-deploy-api-pipelinerun \
+      #       -w name=shared-workspace,volumeClaimTemplateFile=https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/03_persistent_volume_claim.yaml \
+      #       -p deployment-name=fe-application \
+      #       -p git-url=https://github.com/huynguyenquangce/fe_java_application_cicd_ocp.git \
+      #       -p IMAGE=${IMAGE_REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${GIT_SHA} \
+      #       --use-param-defaults
 
 
 
