@@ -1,23 +1,19 @@
-name: Trigger Tekton Pipeline
+# name: Trigger Tekton Pipeline
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-env:
-  GIT_SHA: ${{ github.sha }}
+# jobs:
+#   trigger-tekton:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Download tkn
+#         run: |
+#           curl -LO https://github.com/tektoncd/cli/releases/download/v0.39.0/tkn_0.39.0_Linux_x86_64.tar.gz
+#           tar -xvf tkn_0.39.0_Linux_x86_64.tar.gz
+#           sudo mv tkn /usr/local/bin
 
-jobs:
-  trigger-tekton:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Tekton via curl
-        run: |
-          curl -X POST http://myapp-listener-huy-nguyenquang116-dev.apps.rm1.0a51.p1.openshiftapps.com \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"git-url\": \"https://github.com/huynguyenquangce/fe_java_application_cicd_ocp.git\",
-              \"git-revision\": \"refs/heads/main\",
-              \"image-tag\": \"${GIT_SHA:0:7}\"
-            }"
+
+
